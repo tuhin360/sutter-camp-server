@@ -26,13 +26,22 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+    
 
     const popularClassCollection = client.db("sutterDb").collection("popularClass");
+    const popularInstructorCollection = client.db("sutterDb").collection("popularInstructor");
 
+    // popular class
     app.get('/popularClass', async (req, res) => {
         const result = await popularClassCollection.find().toArray();
         res.send(result);
-    })
+    });
+
+    // popular instructor
+    app.get('/popularInstructor', async (req, res) => {
+      const result = await  popularInstructorCollection.find().toArray();
+      res.send(result);
+  })
 
 
 
