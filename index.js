@@ -24,12 +24,8 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-    
-    
-    
-    const  usersCollection = client
-      .db("sutterDb")
-      .collection("users");
+
+    const usersCollection = client.db("sutterDb").collection("users");
     const popularClassCollection = client
       .db("sutterDb")
       .collection("popularClass");
@@ -41,29 +37,27 @@ async function run() {
       .db("sutterDb")
       .collection("selectClasses");
 
-
     // user api
-    app.get('/users', async (req, res) => {
+    app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
-    })
+    });
 
-
-    app.post('/users', async(req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
-      const query = {email: user.email}
+      const query = { email: user.email };
       const existingUser = await usersCollection.findOne(query);
-      if (existingUser){
-        return res.send({message: 'user already exists'})
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
-    })
+    });
 
     // admin update api
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { _id: new ObjectId(id)};
+      const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           role: "admin",
@@ -73,6 +67,18 @@ async function run() {
       res.send(result);
     });
 
+    // instructor update api
+    app.patch("/users/instructor/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "instructor",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
 
     // popular class
@@ -110,19 +116,12 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/selectClasses/:id", async(req, res) => {
+    app.delete("/selectClasses/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await selectClassCollection.deleteOne(query);
       res.send(result);
     });
-    
-
-
-
-
-
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
