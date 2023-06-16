@@ -24,7 +24,12 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
-
+    
+    
+    
+    const  usersCollection = client
+      .db("sutterDb")
+      .collection("users");
     const popularClassCollection = client
       .db("sutterDb")
       .collection("popularClass");
@@ -35,6 +40,14 @@ async function run() {
     const selectClassCollection = client
       .db("sutterDb")
       .collection("selectClasses");
+
+
+    // user api
+    app.post('/users', async(req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
 
     // popular class
     app.get("/popularClass", async (req, res) => {
@@ -67,7 +80,6 @@ async function run() {
 
     app.post("/selectClasses", async (req, res) => {
       const item = req.body;
-      console.log(item);
       const result = await selectClassCollection.insertOne(item);
       res.send(result);
     });
