@@ -31,6 +31,7 @@ async function run() {
     const popularClassCollection = client.db("sutterDb").collection("popularClass");
     const popularInstructorCollection = client.db("sutterDb").collection("popularInstructor");
     const  allClassCollection = client.db("sutterDb").collection("allClass");
+    const  selectClassCollection = client.db("sutterDb").collection("selectClasses");
 
     // popular class
     app.get('/popularClass', async (req, res) => {
@@ -49,6 +50,17 @@ async function run() {
       const result = await allClassCollection.find().toArray();
       res.send(result);
   })
+
+
+  // select class collection
+  app.post('/selectClasses', async(req, res) =>{
+    const item = req.body;
+    console.log(item);
+    const result = await selectClassCollection.insertOne(item);
+    res.send(result);
+  })
+
+
 
 
 
