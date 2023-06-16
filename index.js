@@ -30,6 +30,7 @@ async function run() {
 
     const popularClassCollection = client.db("sutterDb").collection("popularClass");
     const popularInstructorCollection = client.db("sutterDb").collection("popularInstructor");
+    const  allClassCollection = client.db("sutterDb").collection("allClass");
 
     // popular class
     app.get('/popularClass', async (req, res) => {
@@ -39,7 +40,13 @@ async function run() {
 
     // popular instructor
     app.get('/popularInstructor', async (req, res) => {
-      const result = await  popularInstructorCollection.find().toArray();
+      const result = await popularInstructorCollection.find().toArray();
+      res.send(result);
+  });
+
+    // all class
+    app.get('/allClass', async (req, res) => {
+      const result = await allClassCollection.find().toArray();
       res.send(result);
   })
 
