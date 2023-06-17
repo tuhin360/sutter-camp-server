@@ -86,15 +86,16 @@ async function run() {
       next();
     };
 
-    // const verifyInstructor = async(req, res, next) => {
-    //   const email = req.decoded.email;
-    //   const query = {email: email}
-    //   const user = await usersCollection.findOne(query);
-    //   if(user?.role !== 'instructor'){
-    //     return res.status(403).send({error:true, message: 'forbidden message'})
-    //   }
-    //   next();
-    // };
+     //////// instructor//////////
+    const verifyInstructor = async(req, res, next) => {
+      const email = req.decoded.email;
+      const query = {email: email}
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'instructor'){
+        return res.status(403).send({error:true, message: 'forbidden message'})
+      }
+      next();
+    };
 
 
     // user api
@@ -128,19 +129,19 @@ async function run() {
       res.send(result);
     });
 
-    // // is user instructor or not check
-    // app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
-    //   const email = req.params.email;
+    ////////// is user instructor or not check///// 
+    app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
 
-    //   if (req.decoded.email !== email) {
-    //     res.send({ instructor: false });
-    //   }
+      if (req.decoded.email !== email) {
+        res.send({ instructor: false });
+      }
 
-    //   const query = { email: email };
-    //   const user = await usersCollection.findOne(query);
-    //   const result = { instructor: user?.role === "instructor" };
-    //   res.send(result);
-    // });
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
 
 
 
