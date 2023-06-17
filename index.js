@@ -3,7 +3,10 @@ const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const app = express();
+const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
+
 const port = process.env.PORT || 5000;
+
 
 // middleware
 app.use(cors());
@@ -59,6 +62,9 @@ async function run() {
     const selectClassCollection = client
       .db("sutterDb")
       .collection("selectClasses");
+    const paymentCollection = client
+      .db("sutterDb")
+      .collection("payments");
 
     // JWT
     app.post("/jwt", (req, res) => {
@@ -78,7 +84,18 @@ async function run() {
         return res.status(403).send({error:true, message: 'forbidden message'})
       }
       next();
-    }
+    };
+
+    // const verifyInstructor = async(req, res, next) => {
+    //   const email = req.decoded.email;
+    //   const query = {email: email}
+    //   const user = await usersCollection.findOne(query);
+    //   if(user?.role !== 'instructor'){
+    //     return res.status(403).send({error:true, message: 'forbidden message'})
+    //   }
+    //   next();
+    // };
+
 
     // user api
     app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
@@ -110,6 +127,21 @@ async function run() {
       const result = { admin: user?.role === "admin" };
       res.send(result);
     });
+
+    // // is user instructor or not check
+    // app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+    //   const email = req.params.email;
+
+    //   if (req.decoded.email !== email) {
+    //     res.send({ instructor: false });
+    //   }
+
+    //   const query = { email: email };
+    //   const user = await usersCollection.findOne(query);
+    //   const result = { instructor: user?.role === "instructor" };
+    //   res.send(result);
+    // });
+
 
 
     // admin update api
@@ -195,6 +227,38 @@ async function run() {
       const result = await selectClassCollection.deleteOne(query);
       res.send(result);
     });
+
+
+    // payment intent
+    app.post('/create-payment-intent',  verifyJWT, async(req, res) => {
+      const {price} = req.body;
+      const amount =   parseInt(price * 100); 
+      console.log(price, amount);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+
+    // payment api
+    app.post('/payments', verifyJWT, async(req, res) => {
+      const payment = req.body;
+      const insertResult = await paymentCollection.insertOne(payment);
+
+      const query = {_id: {$in: payment.cartItems.map(id => new ObjectId(id))}};
+      const deleteResult = await selectClassCollection.deleteMany(query);
+
+      res.send({insertResult, deleteResult});
+    })
+
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
